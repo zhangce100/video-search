@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c5cfc"/>
+      <stop offset="100%" style="stop-color:#00d4aa"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#0a0a12"/>
+  <rect x="16" y="16" width="480" height="480" rx="80" fill="url(#g)" opacity="0.15"/>
+  <text x="256" y="220" text-anchor="middle" font-size="160" fill="url(#g)">🎬</text>
+  <text x="256" y="340" text-anchor="middle" font-size="52" font-weight="bold" fill="#fff" font-family="PingFang SC,Microsoft YaHei,sans-serif">全网影视</text>
+  <text x="256" y="400" text-anchor="middle" font-size="28" fill="#8888aa" font-family="PingFang SC,Microsoft YaHei,sans-serif">40+ 平台聚合搜索</text>
+</svg>
