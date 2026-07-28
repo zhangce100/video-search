@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a0a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>全网影视搜索</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0a0a12;--card:#14141f;--card-f:#1c1c2e;--ac:#7c5cfc;--ac2:#00d4aa;--t:#f0f0f8;--t2:#7878a0;--bd:#252540;--r:14px;--fs:18px;--fs-s:14px;--fs-l:26px}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--t);font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:var(--fs)}
+.f:focus,.f:focus-visible{outline:3px solid var(--ac);outline-offset:2px;border-radius:var(--r)}
+.f{transition:transform .15s,box-shadow .15s}
+.f:focus{transform:scale(1.03);box-shadow:0 0 24px rgba(124,92,252,.35)}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:14px 20px;gap:12px;background:rgba(10,10,18,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--bd);flex-shrink:0}
+.logo{font-size:var(--fs-l);font-weight:900;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.sw{flex:1;position:relative;max-width:600px}
+.sw input{width:100%;padding:12px 48px 12px 16px;font-size:var(--fs);border-radius:var(--r);border:2px solid var(--bd);background:var(--card);color:var(--t);outline:none}
+.sw input:focus{border-color:var(--ac);box-shadow:0 0 0 4px rgba(124,92,252,.2)}
+.sw input::placeholder{color:var(--t2)}
+.sw .go{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:10px;background:var(--ac);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tabs{display:flex;gap:6px;padding:10px 20px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 20px;border-radius:22px;border:2px solid var(--bd);background:transparent;color:var(--t2);font-size:var(--fs-s);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.tab:focus{border-color:var(--ac);color:var(--t)}
+.tab.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 20px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.sec{margin-bottom:24px}
+.sec-h{font-size:var(--fs-s);color:var(--t2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-h::before{content:'';width:4px;height:16px;border-radius:2px;background:var(--ac)}
+.hrow{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.hrow::-webkit-scrollbar{display:none}
+.card{flex-shrink:0;width:160px;scroll-snap-align:start;background:var(--card);border-radius:var(--r);overflow:hidden;cursor:pointer;border:2px solid transparent}
+.card:focus{border-color:var(--ac);transform:scale(1.04);box-shadow:0 12px 36px rgba(124,92,252,.3)}
+.card .poster{width:100%;aspect-ratio:2/3;background:var(--card-f);display:flex;align-items:center;justify-content:center;font-size:48px;opacity:.3;position:relative}
+.card .badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.75);padding:2px 8px;border-radius:6px;font-size:12px;color:var(--ac2);font-weight:700}
+.card .info{padding:8px 10px}
+.card .title{font-size:var(--fs-s);font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{font-size:12px;color:var(--t2);margin-top:3px}
+.wcard{display:flex;gap:12px;padding:12px;background:var(--card);border-radius:var(--r);border:2px solid transparent;cursor:pointer;margin-bottom:8px}
+.wcard:focus{border-color:var(--ac);transform:scale(1.01);box-shadow:0 8px 28px rgba(124,92,252,.25)}
+.wcard .thumb{width:160px;height:100px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--card-f);display:flex;align-items:center;justify-content:center;font-size:32px;opacity:.3;position:relative}
+.wcard .thumb img{width:100%;height:100%;object-fit:cover}
+.wcard .thumb .dur{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.85);padding:1px 6px;border-radius:4px;font-size:11px;color:#fff}
+.wcard .body{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.wcard .body .t{font-size:var(--fs);font-weight:700;margin-bottom:4px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wcard .body .d{font-size:var(--fs-s);color:var(--t2);line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wcard .body .f2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.src-tag{font-size:11px;color:var(--ac);font-weight:700;background:rgba(124,92,252,.1);padding:2px 8px;border-radius:5px}
+.meta-tag{font-size:11px;color:var(--t2)}
+.stats{display:flex;gap:16px;padding:8px 0;font-size:var(--fs-s);color:var(--t2);flex-wrap:wrap}
+.stats .v{color:var(--ac);font-weight:700}
+.sfilter{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.sfilter::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:8px;border:2px solid var(--bd);color:var(--t2);font-size:var(--fs-s);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.chip:focus{border-color:var(--ac);color:var(--t)}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.loading{text-align:center;padding:50px 0;color:var(--t2)}
+.spin{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:60px 20px;color:var(--t2)}
+.empty .ei{font-size:64px;margin-bottom:12px;opacity:.4}
+.empty .et{font-size:var(--fs);margin-bottom:6px}
+.empty .eh{font-size:var(--fs-s);opacity:.7}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border-radius:16px;max-width:520px;width:100%;padding:22px;border:2px solid var(--bd);max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal .close{float:right;background:none;border:none;color:var(--t2);font-size:24px;cursor:pointer;padding:4px 8px}
+.modal .close:focus{color:var(--ac)}
+.modal h2{font-size:var(--fs-l);margin-bottom:8px}
+.modal .desc{font-size:var(--fs);color:var(--t2);line-height:1.5;margin-bottom:14px}
+.modal .sec-l{font-size:var(--fs-s);color:var(--t2);margin-bottom:8px;font-weight:700}
+.ml{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.ml a{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(124,92,252,.06);border-radius:10px;border:2px solid var(--bd);text-decoration:none;color:var(--t);font-size:var(--fs)}
+.ml a:focus{border-color:var(--ac);transform:scale(1.01)}
+.ml .li{width:34px;height:34px;border-radius:8px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ml .ln{font-weight:700}
+.ml .lu{font-size:12px;color:var(--t2)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--bd);padding:10px 22px;border-radius:12px;font-size:var(--fs-s);z-index:200;display:none}
+.toast.show{display:block;animation:up .3s ease}
+@keyframes up{from{transform:translateX(-50%) translateY(16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+@media(max-width:600px){:root{--fs:16px;--fs-s:13px;--fs-l:22px}.topbar{padding:10px 14px;gap:8px}.tabs{padding:8px 14px}.content{padding:0 14px 14px}.card{width:130px}.wcard{gap:8px;padding:8px}.wcard .thumb{width:120px;height:75px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo" onclick="goHome()">🎬 影视搜索</div>
+    <div class="sw">
+      <input type="text" id="q" placeholder="🔍 搜索电影、电视剧、动漫..." autocomplete="off">
+      <button class="go f" onclick="doSearch()">🔍</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="content" id="content"></div>
+</div>
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <button class="close f" onclick="closeModal()">✕</button>
+    <h2 id="mT"></h2>
+    <p class="desc" id="mD"></p>
+    <div class="sec-l">📺 搜索链接</div>
+    <div class="ml" id="mL"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+let curQ='',curCat='all';
+
+const CATS=[{id:'all',name:'全部'},{id:'movie',name:'电影'},{id:'tv',name:'电视剧'},{id:'anime',name:'动漫'},{id:'variety',name:'综艺'},{id:'docu',name:'纪录片'},{id:'short',name:'短视频'},{id:'music',name:'MV'}];
+const HOT=['流浪地球3','三体','哪吒','鬼灭之刃','庆余年3','黑神话悟空','漫威','日漫新番','蓝色星球','歌手2026','抖音热榜','韩剧推荐'];
+const CAT_KW={movie:'电影',tv:'电视剧',anime:'动漫',variety:'综艺',docu:'纪录片',short:'短视频',music:'MV'};
+
+// 直接调用公开API，无需后端
+const SOURCES=[
+  {id:'bilibili',name:'B站',icon:'📺',search:q=>`https://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword=${enc(q)}&page=1&pagesize=20&order=totalrank`,parse:async r=>{const d=await r.json();return(d?.data?.result||[]).map(v=>{let p=v.pic||'';if(p.startsWith('//'))p='https:'+p;return{id:v.bvid,title:clean(v.title),desc:(v.description||'').slice(0,150),thumb:p,url:`https://www.bilibili.com/video/${v.bvid}`,src:'B站',dur:v.duration||'',author:v.author||'',play:v.play}})},cors:true},
+  {id:'dailymotion',name:'Dailymotion',icon:'🔵',search:q=>`https://api.dailymotion.com/videos?search=${enc(q)}&limit=20&fields=id,title,description,thumbnail_480_url,duration,url,owner.screenname,views_total&sort=relevance`,parse:async r=>{const d=await r.json();return(d?.list||[]).map(v=>({id:v.id,title:v.title,desc:(v.description||'').slice(0,150),thumb:v.thumbnail_480_url||'',url:v.url||`https://www.dailymotion.com/video/${v.id}`,src:'Dailymotion',dur:fmtS(v.duration),author:v.owner?.screenname||'',play:v.views_total}))},cors:true},
+  {id:'archive',name:'Internet Archive',icon:'🏛️',search:q=>`https://archive.org/advancedsearch.php?q=mediatype%3Amovies+AND+(${enc(q)})&fl[]=identifier&fl[]=title&fl[]=description&fl[]=downloads&fl[]=creator&sort[]=downloads+desc&rows=20&output=json`,parse:async r=>{const d=await r.json();return(d?.response?.docs||[]).map(v=>({id:v.identifier,title:v.title,desc:(v.description||'').slice(0,150),thumb:`https://archive.org/services/img/${v.identifier}`,url:`https://archive.org/details/${v.identifier}`,src:'Archive',author:v.creator||'',play:v.downloads}))},cors:true},
+  {id:'peertube',name:'PeerTube',icon:'🌐',search:q=>`https://sepiasearch.org/api/v1/search/videos?search=${enc(q)}&count=20&sort=-match`,parse:async r=>{const d=await r.json();return(d?.data||[]).map(v=>{const t=v.thumbnails||[];return{id:v.uuid,title:v.name,desc:(v.description||'').slice(0,150),thumb:t.length?t[0].url:'',url:v.url,src:'PeerTube',dur:fmtS(v.duration),author:v.account?.displayName||'',play:v.views})}},cors:true},
+  {id:'odysee',name:'Odysee',icon:'🔮',search:q=>`https://lighthouse.lbry.com/search?s=${enc(q)}&mediaType=video&size=20`,parse:async r=>{const d=await r.json();return Array.isArray(d)?d.map(v=>({id:v.claimId,title:v.title,desc:(v.description||'').slice(0,150),thumb:v.thumbnail||'',url:`https://odysee.com/${v.claimId}`,src:'Odysee',dur:fmtS(v.duration),author:v.channel||''})):[]},cors:true},
+];
+
+// 搜索链接源 (无需API，直接跳转)
+const LINK_SOURCES=[
+  {id:'douyin',name:'抖音',icon:'🎵',url:q=>`https://www.douyin.com/search/${enc(q)}?type=video`},
+  {id:'kuaishou',name:'快手',icon:'⚡',url:q=>`https://www.kuaishou.com/search/video?searchKey=${enc(q)}`},
+  {id:'xigua',name:'西瓜视频',icon:'🍉',url:q=>`https://www.ixigua.com/search/${enc(q)}?type=video`},
+  {id:'haokan',name:'好看视频',icon:'👍',url:q=>`https://haokan.baidu.com/web/search?query=${enc(q)}&type=video`},
+  {id:'weibo',name:'微博',icon:'🔴',url:q=>`https://s.weibo.com/video?q=${enc(q)}`},
+  {id:'xiaohongshu',name:'小红书',icon:'📕',url:q=>`https://www.xiaohongshu.com/search_result?keyword=${enc(q)}&type=video`},
+  {id:'acfun',name:'AcFun',icon:'🅰️',url:q=>`https://www.acfun.cn/search?keyword=${enc(q)}`},
+  {id:'douban',name:'豆瓣',icon:'📗',url:q=>`https://search.douban.com/movie/search?search_text=${enc(q)}`},
+  {id:'crunchyroll',name:'Crunchyroll',icon:'🍥',url:q=>`https://www.crunchyroll.com/search?q=${enc(q)}`},
+  {id:'niconico',name:'Niconico',icon:'🐱',url:q=>`https://www.nicovideo.jp/search/${enc(q)}`},
+  {id:'dmhy',name:'动漫花园',icon:'🌸',url:q=>`https://share.dmhy.org/topics/list?keyword=${enc(q)}`},
+  {id:'age',name:'AGE动漫',icon:'🔮',url:q=>`https://www.agemys.org/search?query=${enc(q)}`},
+  {id:'imdb',name:'IMDB',icon:'🏆',url:q=>`https://www.imdb.com/find?q=${enc(q)}&s=tt`},
+  {id:'tubi',name:'Tubi',icon:'📺',url:q=>`https://tubitv.com/search/${enc(q)}`},
+  {id:'pluto',name:'Pluto TV',icon:'🪐',url:q=>`https://pluto.tv/search?query=${enc(q)}`},
+  {id:'plex',name:'Plex',icon:'📽️',url:q=>`https://www.plex.tv/search/?query=${enc(q)}`},
+  {id:'cupfox',name:'茶杯狐',icon:'☕',url:q=>`https://www.cupfox.app/search?key=***'低端影视',icon:'🎬',url:q=>`https://ddys.pro/?s=${enc(q)}`},
+  {id:'libvio',name:'LIBVIO',icon:'🎥',url:q=>`https://www.libvio.me/search/${enc(q)}`},
+  {id:'zxzj',name:'在线之家',icon:'🏠',url:q=>`https://www.zxzj.me/?s=${enc(q)}`},
+  {id:'dsxys',name:'大师兄',icon:'🐵',url:q=>`https://dsxys.com/search/${enc(q)}`},
+  {id:'bde4',name:'哔嘀影视',icon:'🔹',url:q=>`https://www.bde4.cc/search/${enc(q)}`},
+  {id:'bilibili',name:'B站搜索',icon:'📺',url:q=>`https://search.bilibili.com/all?keyword=${enc(q)}`},
+  {id:'youtube',name:'YouTube',icon:'▶️',url:q=>`https://www.youtube.com/results?search_query=${enc(q)}`},
+  {id:'iqiyi',name:'爱奇艺',icon:'🟢',url:q=>`https://so.iqiyi.com/so/q_${enc(q)}`},
+  {id:'youku',name:'优酷',icon:'🔵',url:q=>`https://so.youku.com/search_video/q_${enc(q)}`},
+  {id:'txsp',name:'腾讯视频',icon:'🔷',url:q=>`https://v.qq.com/x/search/?q=${enc(q)}`},
+  {id:'mgtv',name:'芒果TV',icon:'🥭',url:q=>`https://so.mgtv.com/so/k-${enc(q)}`},
+];
+
+const PLAT_GROUPS=[
+  {label:'🔥 热门搜索',items:HOT.map(k=>({name:k,search:true}))},
+  {label:'📺 免费API直连',items:SOURCES.map(s=>({name:s.name,icon:s.icon}))},
+  {label:'🎬 国内平台',items:LINK_SOURCES.filter(s=>['douyin','kuaishou','xigua','haokan','weibo','xiaohongshu','acfun','douban'].includes(s.id)).map(s=>({name:s.name,icon:s.icon}))},
+  {label:'🌸 动漫专区',items:LINK_SOURCES.filter(s=>['crunchyroll','niconico','dmhy','age'].includes(s.id)).map(s=>({name:s.name,icon:s.icon}))},
+  {label:'🌐 海外平台',items:LINK_SOURCES.filter(s=>['imdb','tubi','pluto','plex'].includes(s.id)).map(s=>({name:s.name,icon:s.icon}))},
+  {label:'🔗 资源聚合站',items:LINK_SOURCES.filter(s=>['cupfox','ddys','libvio','zxzj','dsxys','bde4'].includes(s.id)).map(s=>({name:s.name,icon:s.icon}))},
+];
+
+function init(){renderTabs();renderHome();bindKeys()}
+function bindKeys(){
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){if($('#modal').classList.contains('show')){closeModal();e.preventDefault()}}
+    if(e.key==='/'&&document.activeElement!==$('#q')){$('#q').focus();e.preventDefault()}
+    if(e.key==='Enter'&&document.activeElement===$('#q')){doSearch();e.preventDefault()}
+  });
+}
+function goHome(){curQ='';$('#q').value='';renderTabs();renderHome()}
+function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function renderTabs(){$('#tabs').innerHTML=CATS.map(c=>`<div class="tab f ${c.id===curCat?'on':''}" tabindex="0" data-c="${c.id}" onclick="setCat('${c.id}')">${c.name}</div>`).join('')}
+function setCat(id){curCat=id;$$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.c===id));if(curQ)doSearch()}
+
+function renderHome(){
+  let h='<div class="sec"><div class="sec-h">🔥 热门推荐</div><div class="hrow" id="trendRow"></div></div>';
+  for(const g of PLAT_GROUPS){
+    h+=`<div class="sec"><div class="sec-h">${g.label}</div><div class="hrow">`;
+    for(const p of g.items){
+      const icon=p.icon||'📺';
+      h+=`<div class="card f" tabindex="0" onclick="qs('${p.name}')"><div class="poster">${icon}</div><div class="info"><div class="title">${p.name}</div></div></div>`;
+    }
+    h+='</div></div>';
+  }
+  $('#content').innerHTML=h;
+  renderTrending();
+}
+
+function renderTrending(){
+  const items=[
+    {title:'流浪地球3',emoji:'🚀',rating:'9.2',year:'2026'},{title:'三体 第三季',emoji:'🌌',rating:'9.5',year:'2026'},
+    {title:'哪吒之魔童闹海',emoji:'🔥',rating:'8.9',year:'2025'},{title:'庆余年3',emoji:'⚔️',rating:'8.7',year:'2026'},
+    {title:'鬼灭之刃 无限城篇',emoji:'🗡️',rating:'9.3',year:'2025'},{title:'漫长的季节2',emoji:'🚂',rating:'9.1',year:'2026'},
+    {title:'封神第三部',emoji:'🏛️',rating:'8.5',year:'2026'},{title:'间谍过家家 剧场版',emoji:'🕵️',rating:'8.8',year:'2025'},
+    {title:'蓝色星球3',emoji:'🌊',rating:'9.7',year:'2026'},{title:'歌手2026',emoji:'🎤',rating:'8.6',year:'2026'},
+    {title:'黑神话·悟空 DLC',emoji:'🐒',rating:'9.0',year:'2026'},{title:'奔跑吧 2026',emoji:'🏃',rating:'7.8',year:'2026'},
+  ];
+  const row=$('#trendRow');
+  if(row) row.innerHTML=items.map(i=>`<div class="card f" tabindex="0" onclick="qs('${i.title}')"><div class="poster">${i.emoji}<div class="badge">⭐ ${i.rating}</div></div><div class="info"><div class="title">${i.title}</div><div class="meta">${i.year}</div></div></div>`).join('');
+}
+
+function qs(q){$('#q').value=q;doSearch()}
+
+async function doSearch(){
+  const q=$('#q').value.trim();if(!q)return;
+  curQ=q;
+  const c=$('#content');
+  c.innerHTML='<div class="loading"><div class="spin"></div>正在搜索...</div>';
+
+  // 并发请求所有CORS可用的API
+  const catKw=CAT_KW[curCat]||'';
+  const sq=q+(catKw?' '+catKw:'');
+  const tasks=SOURCES.map(s=>s.search(sq)).map((url,i)=>fetch(url).then(r=>SOURCES[i].parse(r)).catch(()=>[]));
+  
+  const results=await Promise.allSettled(tasks);
+  let allItems=[];
+  results.forEach(r=>{if(r.status==='fulfilled'&&Array.isArray(r.value))allItems=allItems.concat(r.value)});
+
+  // 去重
+  const seen=new Set();
+  const unique=allItems.filter(i=>{const k=i.title.toLowerCase().replace(/\s+/g,'');if(!k||seen.has(k))return false;seen.add(k);return true});
+
+  renderSearchResults(unique,q);
+}
+
+function renderSearchResults(items,q){
+  const c=$('#content');
+  let h=`<div class="stats"><span>找到 <span class="v">${items.length}</span> 条结果</span><span>源: <span class="v">${[...new Set(items.map(i=>i.src))].join(', ')}</span></span></div>`;
+
+  // 源筛选
+  const counts={};items.forEach(i=>{counts[i.src]=(counts[i.src]||0)+1});
+  h+=`<div class="sfilter"><div class="chip f on" tabindex="0" onclick="filterSrc(this,'')">🌐全部(${items.length})</div>`;
+  for(const[src,cnt]of Object.entries(counts)) h+=`<div class="chip f" tabindex="0" onclick="filterSrc(this,'${src}')">${src}(${cnt})</div>`;
+  h+='</div>';
+
+  // 结果列表
+  if(!items.length){
+    h+='<div class="empty"><div class="ei">🔍</div><div class="et">未找到结果</div><div class="eh">换个关键词试试，或点击下方平台直接搜索</div></div>';
+  }else{
+    for(let i=0;i<items.length;i++){
+      const it=items[i];
+      const th=it.thumb?`<img src="${it.thumb}" alt="" onerror="this.parentElement.innerHTML='🎬'">`:'🎬';
+      const dr=it.dur?`<div class="dur">${it.dur}</div>`:'';
+      const ps=it.play?(it.play>=10000?(it.play/10000).toFixed(1)+'万':it.play)+'播放':'';
+      h+=`<div class="wcard f" tabindex="0" data-src="${it.src}" onclick="openItem('${enc(it.url)}','${enc(it.title)}','${enc(it.src)}')"><div class="thumb">${th}${dr}</div><div class="body"><div class="t">${esc(it.title)}</div>${it.desc?`<div class="d">${esc(it.desc)}</div>`:''}<div class="f2"><span class="src-tag">${it.src}</span>${it.author?`<span class="meta-tag">${it.author}</span>`:''}${ps?`<span class="meta-tag">· ${ps}</span>`:''}</div></div></div>`;
+    }
+  }
+
+  // 更多平台链接
+  h+=`<div style="margin-top:20px"><div class="sec-h">🔗 在更多平台搜索</div><div class="hrow">`;
+  for(const s of LINK_SOURCES) h+=`<div class="card f" tabindex="0" onclick="window.open('${s.url(q)}','_blank')"><div class="poster">${s.icon}</div><div class="info"><div class="title">${s.name}</div></div></div>`;
+  h+='</div></div>';
+
+  c.innerHTML=h;
+  const first=c.querySelector('.wcard');if(first)first.focus();
+}
+
+function filterSrc(el,src){
+  $$('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');
+  $$('.wcard').forEach(w=>{w.style.display=(!src||w.dataset.src===src)?'':'none'});
+}
+
+function openItem(url,title,src){
+  window.open(decodeURIComponent(url),'_blank');
+}
+
+function closeModal(){$('#modal').classList.remove('show')}
+function clean(s){return(s||'').replace(/<[^>]+>/g,'')}
+function fmtS(s){if(!s)return'';const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;if(h)return`${h}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;return`${m}:${String(ss).padStart(2,'0')}`}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+function enc(s){return encodeURIComponent(s)}
+init();
+</script>
+</body>
+</html>
