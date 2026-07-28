@@ -1,0 +1,16 @@
+{
+  "name": "全网影视搜索",
+  "short_name": "影视搜索",
+  "description": "聚合40+平台视频影视资源搜索",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a12",
+  "theme_color": "#7c5cfc",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "categories": ["entertainment", "video"],
+  "lang": "zh-CN"
+}
