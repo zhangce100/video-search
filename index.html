@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全网影视搜索</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--card:#13131a;--card-hover:#1a1a25;--accent:#7c5cfc;--accent2:#00d4aa;--text:#e8e8f0;--text2:#8888aa;--border:#222233;--glass:rgba(124,92,252,.08)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+.header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 0}
+.header-inner{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;cursor:pointer}
+.logo small{font-size:11px;color:var(--text2);-webkit-text-fill-color:var(--text2);font-weight:400;margin-left:4px}
+.search-box{flex:1;min-width:180px;position:relative}
+.search-box input{width:100%;padding:11px 46px 11px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:15px;outline:none;transition:.2s}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.15)}
+.search-box input::placeholder{color:var(--text2)}
+.search-btn{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:var(--accent);border:none;color:#fff;width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.search-btn:hover{background:#6a4af0}
+
+.tabs{display:flex;gap:5px;padding:10px 20px;max-width:1280px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;white-space:nowrap;transition:.2s}
+.tab:hover{border-color:var(--accent);color:var(--text)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.main{max-width:1280px;margin:0 auto;padding:0 20px 40px}
+
+.section{margin-bottom:28px}
+.section-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--text2)}
+.section-title::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--accent)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
+@media(max-width:500px){.grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:8px}}
+
+.card{background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;transition:.25s;border:1px solid transparent}
+.card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 10px 28px rgba(124,92,252,.15)}
+.card-poster{width:100%;aspect-ratio:2/3;background:var(--card-hover);position:relative;overflow:hidden}
+.card-poster .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;opacity:.3}
+.card-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);padding:2px 7px;border-radius:5px;font-size:10px;color:var(--accent2);font-weight:600}
+.card-info{padding:8px 10px}
+.card-title{font-size:12px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{font-size:10px;color:var(--text2);margin-top:3px}
+
+.results{display:flex;flex-direction:column;gap:8px}
+.result-item{display:flex;gap:12px;padding:12px;background:var(--card);border-radius:12px;border:1px solid transparent;cursor:pointer;transition:.2s}
+.result-item:hover{border-color:var(--accent);background:var(--card-hover)}
+.result-thumb{width:130px;height:85px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--card-hover);position:relative}
+.result-thumb img{width:100%;height:100%;object-fit:cover}
+.result-thumb .dur{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.8);padding:1px 5px;border-radius:3px;font-size:9px;color:#fff}
+.result-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.result-title{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result-desc{font-size:11px;color:var(--text2);line-height:1.4;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.result-source{font-size:10px;color:var(--accent);font-weight:600;background:var(--glass);padding:2px 7px;border-radius:4px}
+.result-meta{font-size:10px;color:var(--text2)}
+
+.loading{text-align:center;padding:60px 0;color:var(--text2)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:70px 20px;color:var(--text2)}
+.empty-icon{font-size:56px;margin-bottom:12px;opacity:.4}
+.empty-text{font-size:14px;margin-bottom:6px}
+.empty-hint{font-size:11px;opacity:.7}
+
+.source-groups{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.source-group-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.source-group-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:5px 12px;border-radius:7px;font-size:11px;border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:.2s;white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip .cnt{font-size:9px;opacity:.6;margin-left:3px}
+
+.stats-bar{display:flex;gap:14px;align-items:center;padding:8px 0;font-size:11px;color:var(--text2);flex-wrap:wrap}
+.stats-bar .sv{color:var(--accent);font-weight:600}
+
+.pagination{display:flex;justify-content:center;gap:6px;margin-top:20px}
+.pg{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;transition:.2s}
+.pg:hover,.pg.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pg:disabled{opacity:.35;cursor:not-allowed}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:16px;max-width:520px;width:100%;padding:22px;border:1px solid var(--border);position:relative;max-height:82vh;overflow-y:auto}
+.modal-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer}
+.modal h3{font-size:17px;margin-bottom:6px;padding-right:28px}
+.modal .md{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.modal .mt{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.modal .mt span{padding:2px 9px;border-radius:5px;font-size:10px;background:var(--glass);color:var(--accent2)}
+.modal .ms{font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600}
+.ml{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.ml a{display:flex;align-items:center;gap:9px;padding:10px;background:var(--glass);border-radius:9px;border:1px solid var(--border);text-decoration:none;color:var(--text);transition:.2s;font-size:12px}
+.ml a:hover{border-color:var(--accent);background:rgba(124,92,252,.12)}
+.ml .li{width:30px;height:30px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ml .ln{font-weight:600}
+.ml .lu{font-size:10px;color:var(--text2)}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:10px 22px;border-radius:10px;font-size:12px;z-index:300;display:none;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.toast.show{display:block;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+.history-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px}
+.ht{padding:5px 11px;border-radius:7px;font-size:11px;background:var(--card);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:.2s}
+.ht:hover{border-color:var(--accent);color:var(--text)}
+.ht .x{margin-left:5px;opacity:.4;font-size:9px}.ht .x:hover{opacity:1;color:#f55}
+
+@media(max-width:640px){
+  .header-inner{gap:8px}.logo{font-size:18px}
+  .result-thumb{width:95px;height:62px}
+  .result-item{gap:8px;padding:8px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="goHome()">🎬 全网影视搜索 <small>v3.0</small></div>
+    <div class="search-box">
+      <input type="text" id="q" placeholder="搜索电影、电视剧、动漫、综艺、纪录片..." autocomplete="off">
+      <button class="search-btn" onclick="doSearch()">🔍</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-c="all">全部</div>
+  <div class="tab" data-c="movie">电影</div>
+  <div class="tab" data-c="tv">电视剧</div>
+  <div class="tab" data-c="anime">动漫</div>
+  <div class="tab" data-c="variety">综艺</div>
+  <div class="tab" data-c="docu">纪录片</div>
+  <div class="tab" data-c="short">短视频</div>
+  <div class="tab" data-c="music">MV</div>
+</div>
+
+<div class="main">
+  <div id="home">
+    <div id="hist" class="section" style="display:none"><div class="section-title">搜索历史</div><div class="history-tags" id="histTags"></div></div>
+    <div class="section"><div class="section-title">热门推荐</div><div class="grid" id="trendGrid"></div></div>
+    <div class="section"><div class="section-title">🔥 热门搜索</div><div class="source-group-chips" id="hotKw"></div></div>
+    <div class="section"><div class="section-title">📺 平台入口 (40个)</div><div id="platEntry"></div></div>
+  </div>
+  <div id="resultView" style="display:none">
+    <div class="stats-bar" id="stats"></div>
+    <div id="srcFilter"></div>
+    <div class="results" id="results"></div>
+    <div class="loading" id="loading" style="display:none"><div class="spinner"></div><div>正在搜索 40+ 个平台...</div></div>
+    <div class="pagination" id="pag"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="mTitle"></h3>
+    <p class="md" id="mDesc"></p>
+    <div class="mt" id="mTags"></div>
+    <div class="ms">📺 观看 / 搜索</div>
+    <div class="ml" id="mLinks"></div>
+    <div class="ms">🔗 更多平台</div>
+    <div class="ml" id="mExtra"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const API=location.protocol==='file:'?'http://localhost:9000':'';
+let curQ='',curCat='all',curPage=1,curSrc='all',lastResp=null;
+let hist=JSON.parse(localStorage.getItem('vh')||'[]');
+
+const hotKw=['流浪地球3','三体','哪吒','鬼灭之刃','庆余年3','黑神话悟空','漫威','日漫新番','蓝色星球','歌手2026','抖音热榜','韩剧推荐'];
+
+const PLAT={
+  free:{label:'免费直接可用 (公开API)',items:[
+    {id:'bilibili',icon:'📺',name:'B站'},{id:'youtube',icon:'▶️',name:'YouTube'},{id:'dailymotion',icon:'🔵',name:'Dailymotion'},
+    {id:'archive',icon:'🏛️',name:'Internet Archive'},{id:'peertube',icon:'🌐',name:'PeerTube'},{id:'odysee',icon:'🔮',name:'Odysee'},
+  ]},
+  apikey:{label:'需要API Key (可选配置)',items:[
+    {id:'pixabay',icon:'🎨',name:'Pixabay'},{id:'pexels',icon:'📸',name:'Pexels'},{id:'openmovie',icon:'🎬',name:'TMDB'},
+    {id:'omdb',icon:'🎥',name:'OMDB'},{id:'vimeo',icon:'🎞️',name:'Vimeo'},
+  ]},
+  cn:{label:'国内平台',items:[
+    {id:'douyin',icon:'🎵',name:'抖音'},{id:'kuaishou',icon:'⚡',name:'快手'},{id:'xigua',icon:'🍉',name:'西瓜视频'},
+    {id:'haokan',icon:'👍',name:'好看视频'},{id:'weibo',icon:'🔴',name:'微博'},{id:'xiaohongshu',icon:'📕',name:'小红书'},
+    {id:'acfun',icon:'🅰️',name:'AcFun'},{id:'douban',icon:'📗',name:'豆瓣'},
+  ]},
+  anime:{label:'动漫专区',items:[
+    {id:'crunchyroll',icon:'🍥',name:'Crunchyroll'},{id:'mal',icon:'📋',name:'MyAnimeList'},{id:'niconico',icon:'🐱',name:'Niconico'},
+    {id:'dmhy',icon:'🌸',name:'动漫花园'},{id:'age',icon:'🔮',name:'AGE动漫'},{id:'yhdmm',icon:'🌸',name:'樱花动漫'},
+  ]},
+  intl:{label:'海外平台',items:[
+    {id:'rumble',icon:'📢',name:'Rumble'},{id:'twitch',icon:'💜',name:'Twitch'},{id:'ted',icon:'🎓',name:'TED'},{id:'imdb',icon:'🏆',name:'IMDB'},
+  ]},
+  free_stream:{label:'免费流媒体',items:[
+    {id:'tubi',icon:'📺',name:'Tubi'},{id:'pluto',icon:'🪐',name:'Pluto TV'},{id:'plex',icon:'📽️',name:'Plex'},
+    {id:'kanopy',icon:'📚',name:'Kanopy'},{id:'openculture',icon:'🎭',name:'Open Culture'},
+  ]},
+  agg:{label:'资源聚合站',items:[
+    {id:'cupfox',icon:'☕',name:'茶杯狐'},{id:'ddys',icon:'🎬',name:'低端影视'},{id:'libvio',icon:'🎥',name:'LIBVIO'},
+    {id:'zxzj',icon:'🏠',name:'在线之家'},{id:'dsxys',icon:'🐵',name:'大师兄'},{id:'bde4',icon:'🔹',name:'哔嘀影视'},
+  ]},
+};
+
+function init(){
+  loadTrend();renderHotKw();renderPlatEntry();renderHist();bindEvts();
+}
+function bindEvts(){
+  $('#q').onkeydown=e=>{if(e.key==='Enter')doSearch()};
+  $$('.tab').forEach(t=>t.onclick=()=>{$$('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');curCat=t.dataset.c;if(curQ)doSearch()});
+  $('#modal').onclick=e=>{if(e.target===$('#modal'))closeModal()};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='/'&&document.activeElement!==$('#q')){e.preventDefault();$('#q').focus()}});
+}
+function goHome(){curQ='';$('#q').value='';$('#home').style.display='';$('#resultView').style.display='none'}
+
+async function loadTrend(){
+  try{const r=await fetch(`${API}/trending`);const d=await r.json();renderTrend(d.items||[])}catch{$('#trendGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text2);padding:30px">加载中...</div>'}
+}
+function renderTrend(items){
+  $('#trendGrid').innerHTML=items.map(i=>`<div class="card" onclick="qs('${i.title}')"><div class="card-poster"><div class="ph">${i.emoji||'🎬'}</div>${i.rating?`<div class="card-badge">⭐ ${i.rating}</div>`:''}</div><div class="card-info"><div class="card-title">${i.title}</div><div class="card-meta">${i.year||''} · ${tn(i.type)}</div></div></div>`).join('');
+}
+function renderHotKw(){$('#hotKw').innerHTML=hotKw.map(k=>`<div class="chip" onclick="qs('${k}')">🔥 ${k}</div>`).join('')}
+function renderPlatEntry(){
+  let h='';
+  for(const[grp,info]of Object.entries(PLAT)){
+    h+=`<div style="margin-bottom:12px"><div style="font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">${info.label}</div><div class="source-group-chips">`;
+    for(const p of info.items) h+=`<div class="chip" onclick="qs('${p.name}')">${p.icon} ${p.name}</div>`;
+    h+='</div></div>';
+  }
+  $('#platEntry').innerHTML=h;
+}
+function renderHist(){
+  if(!hist.length){$('#hist').style.display='none';return}
+  $('#hist').style.display='';
+  $('#histTags').innerHTML=hist.map((h,i)=>`<div class="ht" onclick="qs('${h.replace(/'/g,"\\'")}')">${h}<span class="x" onclick="event.stopPropagation();delH(${i})">✕</span></div>`).join('');
+}
+function delH(i){hist.splice(i,1);localStorage.setItem('vh',JSON.stringify(hist));renderHist()}
+function addH(q){hist=hist.filter(x=>x!==q);hist.unshift(q);if(hist.length>30)hist.pop();localStorage.setItem('vh',JSON.stringify(hist))}
+function tn(t){return{movie:'电影',tv:'电视剧',anime:'动漫',variety:'综艺',docu:'纪录片',short:'短视频',music:'MV',game:'游戏'}[t]||t||''}
+function qs(q){$('#q').value=q;doSearch()}
+
+async function doSearch(){
+  const q=$('#q').value.trim();if(!q)return;
+  curQ=q;curPage=1;curSrc='all';addH(q);renderHist();
+  $('#home').style.display='none';$('#resultView').style.display='';
+  await search();
+}
+async function search(){
+  $('#results').innerHTML='';$('#loading').style.display='';$('#pag').innerHTML='';$('#srcFilter').innerHTML='';$('#stats').innerHTML='';
+  try{
+    const r=await fetch(`${API}/search?q=${enc(curQ)}&cat=${curCat}&page=${curPage}&page_size=20`);
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const d=await r.json();lastResp=d;$('#loading').style.display='none';
+    renderStats(d);renderSrcFilter(d);renderResults(d);renderPag(d);
+  }catch(e){
+    $('#loading').style.display='none';
+    $('#results').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-text">搜索出错</div><div class="empty-hint">${e.message} · 请确认API已启动</div><div style="margin-top:14px"><button class="pg" onclick="search()">重试</button></div></div>`;
+  }
+}
+function renderStats(d){
+  $('#stats').innerHTML=`<span>找到 <span class="sv">${d.total}</span> 条结果</span><span>耗时 <span class="sv">${d.elapsed_ms}ms</span></span><span>搜索源: <span class="sv">${(d.sources_searched||[]).length}</span> 个平台</span>`;
+}
+function renderSrcFilter(d){
+  const counts={};(d.items||[]).forEach(i=>{counts[i.source]=(counts[i.source]||0)+1});
+  const names={bilibili:'B站',youtube:'YouTube',dailymotion:'Dailymotion',archive:'Archive',peertube:'PeerTube',odysee:'Odysee',vimeo:'Vimeo',rumble:'Rumble',twitch:'Twitch',ted:'TED',douyin:'抖音',kuaishou:'快手',xigua:'西瓜视频',haokan:'好看视频',weibo:'微博',xiaohongshu:'小红书',acfun:'AcFun',douban:'豆瓣',crunchyroll:'Crunchyroll',mal:'MyAnimeList',niconico:'Niconico',dmhy:'动漫花园',age:'AGE动漫',yhdmm:'樱花动漫',pixabay:'Pixabay',pexels:'Pexels',openmovie:'TMDB',omdb:'OMDB',imdb:'IMDB',tubi:'Tubi',pluto:'Pluto TV',plex:'Plex',kanopy:'Kanopy',openculture:'Open Culture',cupfox:'茶杯狐',ddys:'低端影视',libvio:'LIBVIO',zxzj:'在线之家',dsxys:'大师兄',bde4:'哔嘀影视',resource:'资源站'};
+  let h=`<div class="source-groups"><div class="source-group-chips"><div class="chip ${curSrc==='all'?'active':''}" onclick="fSrc('all')">🌐 全部 (${d.total})</div>`;
+  for(const[src,cnt]of Object.entries(counts)) h+=`<div class="chip ${curSrc===src?'active':''}" onclick="fSrc('${src}')">${names[src]||src} (${cnt})</div>`;
+  h+='</div></div>';
+  $('#srcFilter').innerHTML=h;
+}
+function fSrc(id){curSrc=id;if(lastResp){renderSrcFilter(lastResp);renderResults(lastResp)}}
+function renderResults(d){
+  const c=$('#results');let items=d.items||[];
+  if(curSrc!=='all')items=items.filter(i=>i.source===curSrc);
+  if(!items.length){c.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">未找到相关资源</div><div class="empty-hint">换个关键词试试</div></div>';return}
+  c.innerHTML=items.map((it,i)=>{
+    const th=it.thumbnail?`<img src="${it.thumbnail}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:22px;opacity:.3\\'>🎬</div>'">`:'<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;opacity:.25">🎬</div>';
+    const dr=it.duration?`<div class="dur">${it.duration}</div>`:'';
+    const ps=it.play_count?fp(it.play_count)+'播放':'';
+    return`<div class="result-item" onclick="openR(${i})"><div class="result-thumb">${th}${dr}</div><div class="result-body"><div class="result-title">${esc(it.title)}</div>${it.description?`<div class="result-desc">${esc(it.description)}</div>`:''}<div class="result-footer"><span class="result-source">${it.source_name}</span>${it.author?`<span class="result-meta">${it.author}</span>`:''}${ps?`<span class="result-meta">· ${ps}</span>`:''}${it.duration?`<span class="result-meta">· ${it.duration}</span>`:''}</div></div></div>`;
+  }).join('');
+}
+function renderPag(d){
+  if(d.total<=20)return;const tp=Math.ceil(d.total/20);let h=`<button class="pg" onclick="gp(${curPage-1})" ${curPage<=1?'disabled':''}>上一页</button>`;
+  for(let p=Math.max(1,curPage-2);p<=Math.min(tp,curPage+2);p++) h+=`<button class="pg ${p===curPage?'active':''}" onclick="gp(${p})">${p}</button>`;
+  h+=`<button class="pg" onclick="gp(${curPage+1})" ${curPage>=tp?'disabled':''}>下一页</button>`;$('#pag').innerHTML=h;
+}
+function gp(p){if(p<1)return;curPage=p;search();window.scrollTo({top:0,behavior:'smooth'})}
+
+function openR(i){
+  let items=(lastResp?.items)||[];if(curSrc!=='all')items=items.filter(x=>x.source===curSrc);
+  const it=items[i];if(!it)return;
+  $('#mTitle').textContent=it.title;$('#mDesc').textContent=it.description||'暂无描述';
+  $('#mTags').innerHTML=(it.tags||[]).filter(Boolean).map(t=>`<span>${t}</span>`).join('');
+  $('#mLinks').innerHTML=`<a href="${it.url}" target="_blank"><div class="li">${srcIcon(it.source)}</div><div><div class="ln">在${it.source_name}观看</div><div class="lu">${new URL(it.url).hostname}</div></div></a>`;
+  const q=enc(curQ);
+  const extras=[
+    {n:'B站',i:'📺',u:`https://search.bilibili.com/all?keyword=${q}`},{n:'YouTube',i:'▶️',u:`https://www.youtube.com/results?search_query=${q}`},
+    {n:'爱奇艺',i:'🟢',u:`https://so.iqiyi.com/so/q_${q}`},{n:'优酷',i:'🔵',u:`https://so.youku.com/search_video/q_${q}`},
+    {n:'腾讯视频',i:'🔷',u:`https://v.qq.com/x/search/?q=${q}`},{n:'芒果TV',i:'🥭',u:`https://so.mgtv.com/so/k-${q}`},
+    {n:'豆瓣',i:'📗',u:`https://search.douban.com/movie/search?search_text=${q}`},{n:'茶杯狐',i:'☕',u:`https://www.cupfox.app/search?key=${q}`},
+    {n:'Internet Archive',i:'🏛️',u:`https://archive.org/search?query=${q}&and[]=mediatype%3A%22movies%22`},
+    {n:'PeerTube',i:'🌐',u:`https://sepiasearch.org/search/videos?search=${q}`},{n:'Odysee',i:'🔮',u:`https://odysee.com/$/search?q=${q}`},
+    {n:'AcFun',i:'🅰️',u:`https://www.acfun.cn/search?keyword=${q}`},{n:'Crunchyroll',i:'🍥',u:`https://www.crunchyroll.com/search?q=${q}`},
+    {n:'IMDB',i:'🏆',u:`https://www.imdb.com/find?q=${q}&s=tt`},{n:'Tubi',i:'📺',u:`https://tubitv.com/search/${q}`},
+    {n:'抖音',i:'🎵',u:`https://www.douyin.com/search/${q}?type=video`},{n:'快手',i:'⚡',u:`https://www.kuaishou.com/search/video?searchKey=${q}`},
+    {n:'低端影视',i:'🎬',u:`https://ddys.pro/?s=${q}`},{n:'LIBVIO',i:'🎥',u:`https://www.libvio.me/search/${q}`},
+  ];
+  $('#mExtra').innerHTML=extras.map(l=>`<a href="${l.u}" target="_blank"><div class="li">${l.i}</div><div><div class="ln">${l.n}</div><div class="lu">${new URL(l.u).hostname}</div></div></a>`).join('');
+  $('#modal').classList.add('show');
+}
+function closeModal(){$('#modal').classList.remove('show')}
+function srcIcon(s){return{bilibili:'📺',youtube:'▶️',dailymotion:'🔵',archive:'🏛️',peertube:'🌐',odysee:'🔮',vimeo:'🎞️',rumble:'📢',twitch:'💜',ted:'🎓',douyin:'🎵',kuaishou:'⚡',xigua:'🍉',haokan:'👍',weibo:'🔴',xiaohongshu:'📕',acfun:'🅰️',douban:'📗',crunchyroll:'🍥',mal:'📋',niconico:'🐱',dmhy:'🌸',age:'🔮',yhdmm:'🌸',pixabay:'🎨',pexels:'📸',openmovie:'🎬',omdb:'🎥',imdb:'🏆',tubi:'📺',pluto:'🪐',plex:'📽️',kanopy:'📚',openculture:'🎭',cupfox:'☕',ddys:'🎬',libvio:'🎥',zxzj:'🏠',dsxys:'🐵',bde4:'🔹'}[s]||'🔗'}
+function fp(n){if(!n)return'';if(n>=10000)return(n/10000).toFixed(1)+'万';return n+''}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+function enc(s){return encodeURIComponent(s)}
+init();
+</script>
+</body>
+</html>
